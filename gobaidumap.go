@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+
+	"github.com/mmcloughlin/geohash"
 )
 
 // 百度地图API GEO ： http://developer.baidu.com/map/webservice-geocoding.htm
@@ -24,6 +27,18 @@ const (
 	// reqURLForIP API URL for GetAddressViaIP 通过 IP 获取地址
 	reqURLForIP string = "http://api.map.baidu.com/location/ip?ak="
 )
+
+// GetGEOHashViaIP 根据IP获取GEOHash字符串
+func GetGEOHashViaIP(ip string) (string, error) {
+	IPToAddress, err := GetAddressViaIP(ip)
+	if err != nil {
+		return "", err
+	}
+
+	lat, _ := strconv.ParseFloat(IPToAddress.Content.AddressDetail.Point.X, 64)
+	lng, _ := strconv.ParseFloat(IPToAddress.Content.AddressDetail.Point.Y, 64)
+	return geohash.Encode(lat, lng), nil
+}
 
 // GetAddressViaGEO 通过 GEO 坐标信息获取地址
 func GetAddressViaGEO(lat, lng string) (*StructGEOToAddress, error) {
